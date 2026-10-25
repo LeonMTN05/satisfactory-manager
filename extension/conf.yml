@@ -1,0 +1,37 @@
+info:
+  name: "Satisfactory Manager"
+  identifier: "sfmanager"
+  description: "Status, Savegames, Server-Einstellungen und Extras für Satisfactory Dedicated Server."
+  flags: ""
+  version: "0.1.0-dev"
+  target: "beta-2026-08"
+  author: "Leon Elias"
+  icon: ""
+  website: ""
+
+admin:
+  view: "admin/view.blade.php"
+  controller: "admin/controller.php"
+  css: ""
+  wrapper: ""
+
+dashboard:
+  css: ""
+  wrapper: ""
+  components: "components"
+
+data:
+  directory: "private"
+  public: "public"
+  console: "console"
+
+requests:
+  views: ""
+  app: "app"
+  routers:
+    application: ""
+    client: "routers/client.php"
+    web: ""
+
+database:
+  migrations: ""

@@ -1,0 +1,7 @@
+dist/
+extension/.dist/
+node_modules/
+*.blueprint
+.env
+.idea/
+.vscode/

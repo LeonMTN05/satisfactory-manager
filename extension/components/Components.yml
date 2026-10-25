@@ -1,0 +1,6 @@
+# Components API: https://blueprint.zip/docs/configs/componentsyml
+# Welche Eggs den Tab sehen, wird im Admin-Bereich der Erweiterung eingestellt (Blueprint-Bordmittel).
+
+Navigation:
+  Routes:
+    - { Name: "Satisfactory", Path: "/satisfactory", Type: "server", Component: "sections/SatisfactorySection", AdminOnly: "false" }
