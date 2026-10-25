@@ -48,3 +48,26 @@ export const formatPhase = (phase: string): string => {
   const match = /Phase_(\d+)/.exec(phase || '');
   return match ? match[1] : '–';
 };
+
+/** "Session_manual_20261025-1430" – only characters Satisfactory accepts in save names. */
+export const defaultSaveName = (session: string, suffix = 'manual') => {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const stamp = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}`;
+  return `${(session || 'save').replace(/[^\w -]/g, '').slice(0, 40)}_${suffix}_${stamp}`;
+};
+
+/** "2026.10.25-12.34.45" → local date/time string */
+export const formatSaveDate = (value: string): string => {
+  const m = /^(\d{4})\.(\d{2})\.(\d{2})-(\d{2})\.(\d{2})\.(\d{2})$/.exec(value || '');
+  if (!m) return value;
+  // The server reports UTC.
+  const date = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]));
+  return date.toLocaleString();
+};
+
+export const Badge = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+  <span className={classNames('text-xs px-2 py-0.5 rounded bg-neutral-600 text-neutral-100 ml-2', className)}>
+    {children}
+  </span>
+);

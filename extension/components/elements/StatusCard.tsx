@@ -3,9 +3,10 @@ import classNames from 'classnames';
 import { faServer } from '@fortawesome/free-solid-svg-icons';
 import TitledGreyBox from '@/components/elements/TitledGreyBox';
 import { Button } from '@/components/elements/button/index';
-import { Status, logout, saveGame } from '../api/sfmanager';
+import { Dialog } from '@/components/elements/dialog';
+import { Status, logout, power, saveGame } from '../api/sfmanager';
 import { t } from '../lang';
-import { Dot, Stat, formatDuration, formatPhase, useNotify } from './ui';
+import { Dot, Stat, defaultSaveName, formatDuration, formatPhase, useNotify } from './ui';
 
 interface Props {
   uuid: string;
@@ -15,16 +16,10 @@ interface Props {
 
 const tickClass = (tps: number) => (tps >= 25 ? 'text-green-400' : tps >= 15 ? 'text-yellow-400' : 'text-red-400');
 
-const defaultSaveName = (session: string) => {
-  const d = new Date();
-  const pad = (n: number) => String(n).padStart(2, '0');
-  const stamp = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}`;
-  return `${(session || 'save').replace(/[^\w -]/g, '')}_manual_${stamp}`;
-};
-
 export default ({ uuid, status, onChange }: Props) => {
   const notify = useNotify();
   const [busy, setBusy] = useState(false);
+  const [confirm, setConfirm] = useState<'restart' | 'stop' | null>(null);
   const state = status.state;
   const canAdmin = status.access === 'admin' || status.access === 'initial';
 
@@ -37,6 +32,21 @@ export default ({ uuid, status, onChange }: Props) => {
       .then(() => notify.success(t('save.done', saveName)))
       .catch(notify.error)
       .then(() => setBusy(false));
+  };
+
+  const doPower = () => {
+    if (!confirm) return;
+    const action = confirm;
+    setConfirm(null);
+    setBusy(true);
+    notify.clear();
+    power(uuid, action, true)
+      .then((r) => notify.success(r.save ? t('power.done', r.save) : t('power.doneNoSave')))
+      .catch(notify.error)
+      .then(() => {
+        setBusy(false);
+        onChange();
+      });
   };
 
   const doLogout = () => {
@@ -94,7 +104,13 @@ export default ({ uuid, status, onChange }: Props) => {
             />
           </div>
           {canAdmin && (
-            <div className={classNames('flex justify-end mt-4')}>
+            <div className={classNames('flex flex-wrap justify-end gap-2 mt-4')}>
+              <Button.Text onClick={() => setConfirm('stop')} disabled={busy}>
+                {t('power.stop')}
+              </Button.Text>
+              <Button.Text onClick={() => setConfirm('restart')} disabled={busy}>
+                {t('power.restart')}
+              </Button.Text>
               <Button onClick={doSave} disabled={busy || !state.isGameRunning}>
                 {t('save.button')}
               </Button>
@@ -102,6 +118,15 @@ export default ({ uuid, status, onChange }: Props) => {
           )}
         </>
       )}
+      <Dialog.Confirm
+        open={!!confirm}
+        onClose={() => setConfirm(null)}
+        title={confirm === 'stop' ? t('power.stop') : t('power.restart')}
+        confirm={t('common.confirm')}
+        onConfirmed={doPower}
+      >
+        {confirm === 'stop' ? t('power.confirmStop') : t('power.confirmRestart')}
+      </Dialog.Confirm>
     </TitledGreyBox>
   );
 };

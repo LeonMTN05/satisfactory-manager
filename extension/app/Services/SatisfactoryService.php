@@ -282,6 +282,163 @@ class SatisfactoryService
         $this->forgetStatus($server);
     }
 
+    // ---- Savegames -----------------------------------------------------------
+
+    /** Folder of the server saves, relative to the server root (/home/container). */
+    public const SAVE_DIR = '.config/Epic/FactoryGame/Saved/SaveGames/server';
+
+    /** All sessions with their saves, newest first, plus which session is loaded / auto-loaded. */
+    public function sessions(Server $server): array
+    {
+        $api = $this->adminApi($server);
+        $data = $api->call('EnumerateSessions');
+        $state = $api->call('QueryServerState')['serverGameState'] ?? [];
+
+        $sessions = array_map(function (array $session) {
+            $saves = $session['saveHeaders'] ?? [];
+            usort($saves, fn ($a, $b) => strcmp($b['saveDateTime'] ?? '', $a['saveDateTime'] ?? ''));
+
+            return ['sessionName' => $session['sessionName'] ?? '', 'saves' => array_values($saves)];
+        }, $data['sessions'] ?? []);
+
+        return [
+            'sessions' => $sessions,
+            'current_session' => ($state['isGameRunning'] ?? false) ? ($state['activeSessionName'] ?? null) : null,
+            'autoload_session' => $state['autoLoadSessionName'] ?? null,
+            'save_dir' => self::SAVE_DIR,
+        ];
+    }
+
+    /** Loads a save. The API is unavailable for a moment afterwards. */
+    public function load(Server $server, string $saveName, bool $advanced): void
+    {
+        $this->adminApi($server)->call('LoadGame', ['SaveName' => $saveName, 'EnableAdvancedGameSettings' => $advanced], 50);
+        $this->forgetStatus($server);
+    }
+
+    public function deleteSave(Server $server, string $saveName): void
+    {
+        $this->adminApi($server)->call('DeleteSaveFile', ['SaveName' => $saveName]);
+    }
+
+    public function deleteSession(Server $server, string $sessionName): void
+    {
+        $this->adminApi($server)->call('DeleteSaveSession', ['SessionName' => $sessionName]);
+    }
+
+    public function setAutoload(Server $server, string $sessionName): void
+    {
+        $this->adminApi($server)->call('SetAutoLoadSessionName', ['SessionName' => $sessionName]);
+        $this->forgetStatus($server);
+    }
+
+    // ---- Settings -------------------------------------------------------------
+
+    public function settings(Server $server): array
+    {
+        $api = $this->adminApi($server);
+        $options = $api->call('GetServerOptions');
+        $advanced = $api->call('GetAdvancedGameSettings');
+
+        return [
+            'options' => (object) ($options['serverOptions'] ?? []),
+            'pending_options' => (object) ($options['pendingServerOptions'] ?? []),
+            'creative_mode' => (bool) ($advanced['creativeModeEnabled'] ?? false),
+            'advanced' => (object) ($advanced['advancedGameSettings'] ?? []),
+        ];
+    }
+
+    /**
+     * Only keys the server itself reports are accepted, so new options of
+     * future game versions work without an update of the extension.
+     *
+     * @throws SatisfactoryApiException
+     */
+    public function applyOptions(Server $server, array $changes): void
+    {
+        $api = $this->adminApi($server);
+        $known = $api->call('GetServerOptions')['serverOptions'] ?? [];
+        $api->call('ApplyServerOptions', ['UpdatedServerOptions' => (object) $this->onlyKnown($changes, $known)]);
+    }
+
+    /** @throws SatisfactoryApiException */
+    public function applyAdvanced(Server $server, array $changes): void
+    {
+        $api = $this->adminApi($server);
+        $known = $api->call('GetAdvancedGameSettings')['advancedGameSettings'] ?? [];
+        $api->call('ApplyAdvancedGameSettings', ['AppliedAdvancedGameSettings' => (object) $this->onlyKnown($changes, $known)]);
+    }
+
+    private function onlyKnown(array $changes, array $known): array
+    {
+        $unknown = array_diff(array_keys($changes), array_keys($known));
+        if ($unknown) {
+            throw new SatisfactoryApiException('sfm_unknown_option', 'Unknown option: ' . implode(', ', $unknown), 422);
+        }
+
+        return array_map(fn ($v) => (string) $v, $changes);
+    }
+
+    public function rename(Server $server, string $serverName): void
+    {
+        $this->adminApi($server)->call('RenameServer', ['ServerName' => $serverName]);
+    }
+
+    /** Empty password removes the player password. */
+    public function setClientPassword(Server $server, string $password): void
+    {
+        $this->adminApi($server)->call('SetClientPassword', ['Password' => $password]);
+        $this->forgetStatus($server);
+    }
+
+    /**
+     * Changes the admin password. All old tokens become invalid, so we log in
+     * again with the new password and store the fresh token.
+     */
+    public function setAdminPassword(Server $server, string $password): void
+    {
+        $api = $this->adminApi($server);
+        $current = $this->storedToken($server);
+        $api->call('SetAdminPassword', ['Password' => $password, 'AuthenticationToken' => $current ?? '']);
+
+        try {
+            $this->login($server, $password);
+        } catch (SatisfactoryApiException $e) {
+            $this->forgetToken($server);
+            throw $e;
+        }
+    }
+
+    // ---- Console & power ------------------------------------------------------
+
+    public function command(Server $server, string $command): array
+    {
+        $result = $this->adminApi($server)->call('RunCommand', ['Command' => $command], 20);
+
+        return [
+            'result' => $result['commandResult'] ?? '',
+            'success' => (bool) ($result['returnValue'] ?? false),
+        ];
+    }
+
+    /**
+     * Saves the running game (if any) and returns the save name, or null if nothing was running.
+     */
+    public function saveBefore(Server $server, string $suffix): ?string
+    {
+        $api = $this->adminApi($server);
+        $state = $api->call('QueryServerState')['serverGameState'] ?? [];
+        if (empty($state['isGameRunning'])) {
+            return null;
+        }
+
+        $session = preg_replace('/[^\pL\pN _-]/u', '', (string) ($state['activeSessionName'] ?? '')) ?: 'save';
+        $name = mb_substr($session, 0, 40) . '_' . $suffix;
+        $api->call('SaveGame', ['SaveName' => $name], 50);
+
+        return $name;
+    }
+
     // ---- Connection info ------------------------------------------------------
 
     /** Address for players plus a TCP check of the game and reliable ports, seen from the panel. */

@@ -71,3 +71,54 @@ export const saveGame = (uuid: string, saveName: string) => http.post(`${base(uu
 
 /** Error code from our backend (e.g. "wrong_password", "sfm_unreachable"). */
 export const errorCode = (error: any): string | undefined => error?.response?.data?.errors?.[0]?.code;
+
+// ---- Phase 2 ----------------------------------------------------------------
+
+export interface SaveHeader {
+  saveName: string;
+  sessionName: string;
+  saveDateTime: string;
+  playDurationSeconds: number;
+  buildVersion: number;
+  isModdedSave: boolean;
+  isEditedSave: boolean;
+  isCreativeModeEnabled: boolean;
+}
+
+export interface Sessions {
+  sessions: { sessionName: string; saves: SaveHeader[] }[];
+  current_session: string | null;
+  autoload_session: string | null;
+  save_dir: string;
+}
+
+export interface Settings {
+  options: Record<string, string>;
+  pending_options: Record<string, string>;
+  creative_mode: boolean;
+  advanced: Record<string, string>;
+}
+
+export const getSessions = (uuid: string): Promise<Sessions> => http.get(`${base(uuid)}/sessions`).then((r) => r.data);
+export const loadSave = (uuid: string, saveName: string, advanced: boolean) =>
+  http.post(`${base(uuid)}/saves/load`, { name: saveName, advanced });
+export const deleteSave = (uuid: string, saveName: string) => http.post(`${base(uuid)}/saves/delete`, { name: saveName });
+export const deleteSession = (uuid: string, session: string) => http.post(`${base(uuid)}/sessions/delete`, { session });
+export const setAutoload = (uuid: string, session: string) => http.post(`${base(uuid)}/sessions/autoload`, { session });
+
+export const getSettings = (uuid: string): Promise<Settings> => http.get(`${base(uuid)}/settings`).then((r) => r.data);
+export const updateOptions = (uuid: string, settings: Record<string, string>) =>
+  http.put(`${base(uuid)}/settings/options`, { settings });
+export const updateAdvanced = (uuid: string, settings: Record<string, string>) =>
+  http.put(`${base(uuid)}/settings/advanced`, { settings });
+export const renameServer = (uuid: string, serverName: string) =>
+  http.post(`${base(uuid)}/settings/rename`, { server_name: serverName });
+export const setClientPassword = (uuid: string, password: string) =>
+  http.post(`${base(uuid)}/settings/client-password`, { password });
+export const setAdminPassword = (uuid: string, password: string, confirmation: string) =>
+  http.post(`${base(uuid)}/settings/admin-password`, { password, password_confirmation: confirmation });
+
+export const runCommand = (uuid: string, command: string): Promise<{ result: string; success: boolean }> =>
+  http.post(`${base(uuid)}/command`, { command }).then((r) => r.data);
+export const power = (uuid: string, action: 'restart' | 'stop', save: boolean): Promise<{ save: string | null }> =>
+  http.post(`${base(uuid)}/power/${action}`, { save }).then((r) => r.data);

@@ -16,6 +16,11 @@ Endpunkt: `POST https://<allocation-ip>:<spielport>/api/v1`, Body `{"function": 
 - Token-Payload = Base64-JSON vor dem Punkt, z. B. `{"pl":"InitialAdmin"}`.
 - Parameter-Namen in PascalCase (`MinimumPrivilegeLevel`, `SaveName`). Kleinschreibung wird aber auch akzeptiert.
 
+- Saves liegen unter `/home/container/.config/Epic/FactoryGame/Saved/SaveGames/server/<SaveName>.sav`. Dort abgelegte Dateien zeigt `EnumerateSessions` sofort an. Deshalb laufen Upload und Download über Wings statt über `UploadSaveGame`/`DownloadSaveGame` (umgeht die PHP-Uploadgrenze von 2 MB).
+- `GetServerOptions` liefert auch undokumentierte Optionen (z. B. `FG.WeatherPreset`). Die Oberfläche zeigt unbekannte Optionen generisch an, das Backend akzeptiert nur Schlüssel, die der Server selbst meldet.
+- `saveDateTime` ist UTC im Format `2026.10.25-12.34.45`.
+- `RunCommand` mit unbekanntem Befehl → `{"commandResult":"Unknown Console Command","returnValue":false}`.
+
 ## Blueprint-Eigenheit
 
 - Der Platzhalter `{appcontext}` verliert beim Ersetzen die Backslashes. Den Namespace deshalb direkt schreiben: `Pterodactyl\BlueprintFramework\Extensions\sfmanager`.

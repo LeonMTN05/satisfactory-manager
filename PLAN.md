@@ -46,7 +46,10 @@ Blueprint-Konsole (Cronjob jede Minute): Status abfragen, Verlauf speichern (sp�
   - Jetzt speichern: `control.console`
   - Neues Spiel: `control.restart`
   - Einrichten, Admin-Login, Abmelden: `startup.update`
-  - geplant: `file.read` für Save-Download, `file.update` für Save-Upload, `control.restart` für Laden und Neustart
+  - Saves auflisten: `file.read` · Laden: `control.restart` · Löschen: `file.delete`
+  - Upload und Download laufen über das Dateisystem von Pterodactyl/Wings (eigene Rechte `file.create` und `file.read`, keine PHP-Uploadgrenze)
+  - Einstellungen lesen: `startup.read` · ändern, Auto-Load, Umbenennen, Passwörter: `startup.update`
+  - Konsole: `control.console` · Speichern & neu starten: `control.restart` · Speichern & stoppen: `control.stop`
 - **Token:** Das Admin-Passwort wird nur einmal für `PasswordLogin` gebraucht. Gespeichert wird nur das Token, verschlüsselt mit Laravels `encrypt()`.
 - **Adresse:** Die IP kommt aus der primären Allocation, bei `0.0.0.0` die Node-FQDN. 127.0.0.1 funktioniert nicht, weil Docker an die Allocation-IP bindet.
 - **Schutz:** Login und Einrichtung sind auf 5 Versuche pro Minute begrenzt, alle Aktionen landen im Aktivitätslog des Servers.
@@ -60,13 +63,13 @@ Blueprint-Konsole (Cronjob jede Minute): Status abfragen, Verlauf speichern (sp�
 3. **Verbindungs-Infos**: IP:Port zum Kopieren, Hinweis auf UDP/TCP 7777 und TCP 8888, dazu ein Erreichbarkeits-Check der Ports.
 4. **Jetzt speichern**: `SaveGame` mit Namen.
 
-### Savegame-Manager
+### Savegame-Manager ✅ Phase 2 umgesetzt
 - „Neues Spiel“-Karte ✅ (aus Phase 2 vorgezogen)
 5. Liste aller Sessions und Saves (Datum, Spielzeit, Build-Version, modded ja/nein).
 6. Herunterladen, Hochladen (optional gleich laden), Laden, Löschen, Auto-Load-Session festlegen.
 7. **Neues Spiel** mit Startgebiet und „Onboarding überspringen“.
 
-### Server-Einstellungen
+### Server-Einstellungen ✅ Phase 2 umgesetzt
 8. Oberfläche für Server-Optionen: Auto-Pause, Autosave beim Verlassen, Autosave-Intervall, Netzwerkqualität, Neustart-Zeitfenster, saisonale Events.
 9. **Erweiterte Spieleinstellungen**: kein Baukosten, Flugmodus, God-Mode usw., mit deutlicher Warnung, dass Erfolge dann deaktiviert werden.
 10. Server umbenennen, Spieler- und Admin-Passwort ändern.
@@ -119,7 +122,7 @@ Ausgewählt nach Nutzen für Serverbetreiber, Alleinstellung auf dem Blueprint-M
 |---|---|---|
 | 0 | Repo, Ordner, Dev-Workflow, Testserver | erledigt (Testserver wird erstellt) |
 | 1 | API-Client, Token-Speicher, Status-Karte, Claim-Assistent, Verbindungs-Infos, Jetzt speichern, DE/EN-Grundgerüst | ✅ MVP (Claim-Assistent noch im Browser testen) |
-| 2 | Savegame-Manager, Server- und Spieleinstellungen, Konsole, sicherer Neustart | vollständige Verwaltung |
+| 2 | Savegame-Manager, Server- und Spieleinstellungen, Konsole, sicherer Neustart | ✅ vollständige Verwaltung (Laden, Neustart und Passwörter noch im Browser testen) |
 | 3 | Extras Stufe A (13–18), Admin-Seite | Funktionsumfang 1.0 |
 | 4 | Übersetzungen vervollständigen, Doku, Screenshots, Icon, Marktplatz-Eintrag, Release über GitHub Actions | **Release 1.0 auf blueprint.zip** |
 | 5 | Extras Stufe B (19–24, u. a. Discord) | 1.x-Updates |
