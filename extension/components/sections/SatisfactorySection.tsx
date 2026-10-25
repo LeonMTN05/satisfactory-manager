@@ -1,25 +1,47 @@
-import React, { useEffect, useState } from 'react';
-import PageContentBlock from '@/components/elements/PageContentBlock';
+import React from 'react';
+import ServerContentBlock from '@/components/elements/ServerContentBlock';
+import FlashMessageRender from '@/components/FlashMessageRender';
+import Spinner from '@/components/elements/Spinner';
 import { ServerContext } from '@/state/server';
-import http from '@/api/http';
+import { useStatus } from '../api/sfmanager';
+import { t } from '../lang';
+import { FLASH_KEY } from '../elements/ui';
+import StatusCard from '../elements/StatusCard';
+import ClaimWizard from '../elements/ClaimWizard';
+import LoginCard from '../elements/LoginCard';
+import ConnectionCard from '../elements/ConnectionCard';
 
-// Platzhalter: prüft nur, ob das Backend der Erweiterung erreichbar ist.
 const SatisfactorySection = () => {
   const uuid = ServerContext.useStoreState((state) => state.server.data!.uuid);
-  const [backend, setBackend] = useState<string>('…');
+  const serverName = ServerContext.useStoreState((state) => state.server.data!.name);
+  const { data: status, revalidate } = useStatus(uuid);
 
-  useEffect(() => {
-    http
-      .get(`/api/client/extensions/sfmanager/ping`)
-      .then(({ data }) => setBackend(`OK (v${data.version})`))
-      .catch(() => setBackend('nicht erreichbar'));
-  }, [uuid]);
+  const refresh = () => {
+    revalidate();
+  };
 
   return (
-    <PageContentBlock title={'Satisfactory'}>
-      <p>Satisfactory Manager – Grundgerüst.</p>
-      <p>Backend: {backend}</p>
-    </PageContentBlock>
+    <ServerContentBlock title={t('title')}>
+      <FlashMessageRender byKey={FLASH_KEY} className={'mb-4'} />
+      {!status ? (
+        <Spinner centered size={'large'} />
+      ) : (
+        <div className={'grid lg:grid-cols-3 gap-4'}>
+          <div className={'lg:col-span-2 space-y-4'}>
+            <StatusCard uuid={uuid} status={status} onChange={refresh} />
+            {status.reachable && status.access === 'initial' && (
+              <ClaimWizard uuid={uuid} defaultName={serverName} onDone={refresh} />
+            )}
+            {status.reachable && (status.access === 'none' || status.access === 'client') && (
+              <LoginCard uuid={uuid} onDone={refresh} />
+            )}
+          </div>
+          <div>
+            <ConnectionCard uuid={uuid} />
+          </div>
+        </div>
+      )}
+    </ServerContentBlock>
   );
 };
 

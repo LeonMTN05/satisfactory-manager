@@ -34,4 +34,4 @@ requests:
     web: ""
 
 database:
-  migrations: ""
+  migrations: "database/migrations"

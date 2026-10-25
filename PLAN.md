@@ -9,7 +9,7 @@ Blueprint-Erweiterung für Pterodactyl, die Satisfactory Dedicated Server direkt
 | Panel | Pterodactyl 1.15.2, Blueprint beta-2026-08, Developer-Modus **an** |
 | Node | `paprika.kindergulasch.de`, Wings + Docker laufen, 4 CPU / 15 GB RAM |
 | Egg | „Satisfactory“ (ID 15) importiert, Ports 7777 (Spiel + HTTPS-API) und 8888 (Reliable) |
-| Testserver | wird gerade erstellt |
+| Testserver | „TestSatis“ läuft (fabrik.kindergulasch.de:7777) |
 | GitHub | https://github.com/LeonMTN05/satisfactory-manager (öffentlich) |
 
 ## Technische Grundlage
@@ -41,15 +41,21 @@ Blueprint-Konsole (Cronjob jede Minute): Status abfragen, Verlauf speichern (sp�
 ```
 
 - **Nur für Satisfactory-Server sichtbar:** Blueprint kann den Tab im Admin-Bereich auf bestimmte Eggs begrenzen (eingebaut).
-- **Rechte für Unternutzer:** Wir koppeln Aktionen an vorhandene Pterodactyl-Rechte, z. B. `control.console` für Status, `file.read` für Save-Download, `file.update` für Save-Upload, `control.restart` für Laden/Neustart, `startup.update` für Einstellungen.
+- **Rechte für Unternutzer:** Aktionen sind an vorhandene Pterodactyl-Rechte gekoppelt:
+  - Status und Verbindung: `websocket.connect` (wer die Konsole sehen darf)
+  - Jetzt speichern: `control.console`
+  - Einrichten, Admin-Login, Abmelden: `startup.update`
+  - geplant: `file.read` für Save-Download, `file.update` für Save-Upload, `control.restart` für Laden und Neustart
 - **Token:** Das Admin-Passwort wird nur einmal für `PasswordLogin` gebraucht. Gespeichert wird nur das Token, verschlüsselt mit Laravels `encrypt()`.
-- **Adresse:** Die IP kommt aus der Allocation. Bei `0.0.0.0` nehmen wir die Node-FQDN, und wenn Panel und Wings auf derselben Maschine laufen, `127.0.0.1`.
+- **Adresse:** Die IP kommt aus der primären Allocation, bei `0.0.0.0` die Node-FQDN. 127.0.0.1 funktioniert nicht, weil Docker an die Allocation-IP bindet.
+- **Schutz:** Login und Einrichtung sind auf 5 Versuche pro Minute begrenzt, alle Aktionen landen im Aktivitätslog des Servers.
+- API-Eigenheiten: siehe [docs/satisfactory-api.md](docs/satisfactory-api.md).
 
 ## Funktionen
 
-### Kern (MVP)
+### Kern (MVP) ✅ Phase 1 umgesetzt
 1. **Status-Karte**: online/offline, Spieler x/y, Tech-Tier und Phase, Tickrate, Session-Name, Spielzeit, automatisch aktualisiert.
-2. **Einrichtungs-Assistent**: Einen neuen Server direkt im Panel „claimen“ (Servername und Admin-Passwort setzen). Dafür braucht man das Spiel nicht.
+2. **Einrichtungs-Assistent**: Einen neuen Server direkt im Panel „claimen“ (Servername und Admin-Passwort setzen). Dafür braucht man das Spiel nicht. Optional lassen sich gleich ein Spieler-Passwort setzen und ein neues Spiel starten (Startgebiet, Tutorial überspringen).
 3. **Verbindungs-Infos**: IP:Port zum Kopieren, Hinweis auf UDP/TCP 7777 und TCP 8888, dazu ein Erreichbarkeits-Check der Ports.
 4. **Jetzt speichern**: `SaveGame` mit Namen.
 
@@ -101,7 +107,7 @@ Ausgewählt nach Nutzen für Serverbetreiber, Alleinstellung auf dem Blueprint-M
 
 ### Grundlage für alle Funktionen
 - **Admin-Seite**: alle Satisfactory-Server auf einen Blick, globale Standardwerte (Polling-Intervall, Backup-Rotation), jede Funktion einzeln abschaltbar.
-- **Sprachen**: Deutsch und Englisch ab 1.0. Der Marktplatz ist international.
+- **Sprachen**: Deutsch und Englisch, von Anfang an eingebaut (`components/lang.ts`, Auswahl nach Browsersprache). Der Marktplatz ist international.
 - **Sicherheit**: Token verschlüsselt speichern. Verbindungen nur zu Allocations des jeweiligen Servers, damit niemand über das Panel beliebige Adressen ansteuern kann (SSRF-Schutz). Jede Aktion prüft die passenden Unternutzer-Rechte.
 - **Datenschutz**: keine Telemetrie. Externe Abfragen (Steam-Build, später Discord) passieren nur, wenn sie eingeschaltet sind.
 
@@ -110,10 +116,10 @@ Ausgewählt nach Nutzen für Serverbetreiber, Alleinstellung auf dem Blueprint-M
 | Phase | Inhalt | Ergebnis |
 |---|---|---|
 | 0 | Repo, Ordner, Dev-Workflow, Testserver | erledigt (Testserver wird erstellt) |
-| 1 | API-Client, Token-Speicher, Status-Karte, Claim-Assistent, Verbindungs-Infos, Jetzt speichern | MVP |
+| 1 | API-Client, Token-Speicher, Status-Karte, Claim-Assistent, Verbindungs-Infos, Jetzt speichern, DE/EN-Grundgerüst | ✅ MVP (Claim-Assistent noch im Browser testen) |
 | 2 | Savegame-Manager, Server- und Spieleinstellungen, Konsole, sicherer Neustart | vollständige Verwaltung |
 | 3 | Extras Stufe A (13–18), Admin-Seite | Funktionsumfang 1.0 |
-| 4 | Übersetzungen DE/EN, Doku, Screenshots, Icon, Marktplatz-Eintrag, Release über GitHub Actions | **Release 1.0 auf blueprint.zip** |
+| 4 | Übersetzungen vervollständigen, Doku, Screenshots, Icon, Marktplatz-Eintrag, Release über GitHub Actions | **Release 1.0 auf blueprint.zip** |
 | 5 | Extras Stufe B (19–24, u. a. Discord) | 1.x-Updates |
 | 6 | Mod-Manager (25) | 2.0 |
 
