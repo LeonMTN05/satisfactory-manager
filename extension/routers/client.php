@@ -6,8 +6,11 @@ use Pterodactyl\Http\Middleware\Activity\ServerSubject;
 use Pterodactyl\Http\Middleware\Api\Client\Server\AuthenticateServerAccess;
 use Pterodactyl\Http\Middleware\Api\Client\Server\ResourceBelongsToServer;
 use Pterodactyl\BlueprintFramework\Extensions\sfmanager\Http\Controllers\ServerController;
+use Pterodactyl\BlueprintFramework\Extensions\sfmanager\Http\Controllers\AutomationController;
 
 Route::get('/ping', fn () => ['ok' => true, 'version' => '{version}']);
+
+Route::get('/badges', [AutomationController::class, 'badges']);
 
 Route::group([
     'prefix' => '/servers/{server}',
@@ -34,6 +37,16 @@ Route::group([
     Route::post('/command', [ServerController::class, 'command'])->middleware('throttle:30,1,sfmanager-cmd');
     Route::post('/power/restart', [ServerController::class, 'restart'])->middleware('throttle:5,1,sfmanager-power');
     Route::post('/power/stop', [ServerController::class, 'stop'])->middleware('throttle:5,1,sfmanager-power');
+
+    Route::get('/automation', [AutomationController::class, 'show']);
+    Route::put('/automation', [AutomationController::class, 'update'])->middleware('throttle:20,1,sfmanager');
+    Route::get('/backups', [AutomationController::class, 'backups']);
+    Route::post('/backups', [AutomationController::class, 'createBackup'])->middleware('throttle:5,1,sfmanager-backup');
+    Route::post('/backups/{backup}/restore', [AutomationController::class, 'restoreBackup'])->whereNumber('backup')->middleware('throttle:5,1,sfmanager-backup');
+    Route::delete('/backups/{backup}', [AutomationController::class, 'deleteBackup'])->whereNumber('backup');
+    Route::get('/metrics', [AutomationController::class, 'metrics']);
+    Route::post('/update', [AutomationController::class, 'runUpdate'])->middleware('throttle:5,1,sfmanager-power');
+    Route::put('/branch', [AutomationController::class, 'branch'])->middleware('throttle:20,1,sfmanager');
 
     // Password-related actions are rate-limited against brute force.
     Route::post('/claim', [ServerController::class, 'claim'])->middleware('throttle:5,1,sfmanager-auth');

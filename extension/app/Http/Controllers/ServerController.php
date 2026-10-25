@@ -9,6 +9,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Pterodactyl\Http\Controllers\Api\Client\ClientApiController;
 use Pterodactyl\BlueprintFramework\Extensions\sfmanager\Services\SatisfactoryService;
+use Pterodactyl\BlueprintFramework\Extensions\sfmanager\Services\AutomationSettings;
+use Pterodactyl\BlueprintFramework\Extensions\sfmanager\Services\BackupService;
+use Pterodactyl\BlueprintFramework\Extensions\sfmanager\Services\GlobalSettings;
 use Pterodactyl\BlueprintFramework\Extensions\sfmanager\Http\Requests\ClaimRequest;
 use Pterodactyl\BlueprintFramework\Extensions\sfmanager\Http\Requests\LoginRequest;
 use Pterodactyl\BlueprintFramework\Extensions\sfmanager\Http\Requests\LogoutRequest;
@@ -115,6 +118,9 @@ class ServerController extends ClientApiController
 
     public function load(LoadSaveRequest $request, Server $server): Response
     {
+        if (AutomationSettings::get($server)['backup']['before_load'] && app(GlobalSettings::class)->enabled('backups')) {
+            app(BackupService::class)->create($server, 'before-load');
+        }
         $this->service->load($server, $request->input('name'), $request->boolean('advanced'));
         Activity::event('server:sfmanager.load')->property('name', $request->input('name'))->log();
 

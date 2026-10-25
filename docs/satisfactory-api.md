@@ -25,3 +25,11 @@ Endpunkt: `POST https://<allocation-ip>:<spielport>/api/v1`, Body `{"function": 
 
 - Der Platzhalter `{appcontext}` verliert beim Ersetzen die Backslashes. Den Namespace deshalb direkt schreiben: `Pterodactyl\BlueprintFramework\Extensions\sfmanager`.
 - In TSX-Dateien keine Ausdrücke wie `{name}`, `{version}`, `{mode}` oder `{root}` verwenden: Blueprint ersetzt sie als Platzhalter.
+
+## Wings / Panel
+
+- `POST /api/servers/{uuid}/files/compress` legt das Archiv im `root` ab (Name in der Antwort) – danach verschieben wir es nach `/.sfmanager-backups/`. Das Archiv gehört danach `root:root`, Wings kann es trotzdem lesen und löschen.
+- `GET /api/servers/{uuid}/logs?size=N` liefert die letzten Konsolenzeilen (für den Absturz-Wächter).
+- `GET /api/servers/{uuid}` → `state` und `utilization.uptime` (ms).
+- Der Port-Check darf den Spielport nicht per reinem TCP prüfen: Jeder Versuch erzeugt im Server-Log `LogSocketsSSL: Failed to initialize SSL state`. Stattdessen `HealthCheck`.
+- Steam-Build: `https://api.steamcmd.net/v1/info/1690800` → `data.1690800.depots.branches.<branch>.buildid`. Installiert: `steamapps/appmanifest_1690800.acf` → `buildid`.

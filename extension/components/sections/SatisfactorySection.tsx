@@ -15,8 +15,10 @@ import NewGameCard from '../elements/NewGameCard';
 import SavesTab from '../elements/SavesTab';
 import SettingsTab from '../elements/SettingsTab';
 import ConsoleTab from '../elements/ConsoleTab';
+import AutomationTab from '../elements/AutomationTab';
+import HistoryCard from '../elements/HistoryCard';
 
-type Tab = 'overview' | 'saves' | 'settings' | 'console';
+type Tab = 'overview' | 'saves' | 'automation' | 'settings' | 'console';
 
 const SatisfactorySection = () => {
   const uuid = ServerContext.useStoreState((state) => state.server.data!.uuid);
@@ -31,7 +33,7 @@ const SatisfactorySection = () => {
   // Savegames, settings and console need admin rights on the Satisfactory server.
   const isAdmin = !!status && status.reachable && (status.access === 'admin' || status.access === 'initial');
   const current: Tab = isAdmin ? tab : 'overview';
-  const tabs: Tab[] = isAdmin ? ['overview', 'saves', 'settings', 'console'] : ['overview'];
+  const tabs: Tab[] = isAdmin ? ['overview', 'saves', 'automation', 'settings', 'console'] : ['overview'];
 
   return (
     <ServerContentBlock title={t('title')}>
@@ -58,6 +60,8 @@ const SatisfactorySection = () => {
         <Spinner centered size={'large'} />
       ) : current === 'saves' ? (
         <SavesTab uuid={uuid} onChange={refresh} />
+      ) : current === 'automation' ? (
+        <AutomationTab uuid={uuid} onChange={refresh} />
       ) : current === 'settings' ? (
         <SettingsTab uuid={uuid} onChange={refresh} />
       ) : current === 'console' ? (
@@ -66,6 +70,7 @@ const SatisfactorySection = () => {
         <div className={'grid lg:grid-cols-3 gap-4'}>
           <div className={'lg:col-span-2 space-y-4'}>
             <StatusCard uuid={uuid} status={status} onChange={refresh} />
+            <HistoryCard uuid={uuid} />
             {status.reachable && status.access === 'initial' && (
               <ClaimWizard uuid={uuid} defaultName={serverName} onDone={refresh} />
             )}

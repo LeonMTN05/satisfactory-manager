@@ -52,6 +52,10 @@ Blueprint-Konsole (Cronjob jede Minute): Status abfragen, Verlauf speichern (sp�
   - Konsole: `control.console` · Speichern & neu starten: `control.restart` · Speichern & stoppen: `control.stop`
 - **Token:** Das Admin-Passwort wird nur einmal für `PasswordLogin` gebraucht. Gespeichert wird nur das Token, verschlüsselt mit Laravels `encrypt()`.
 - **Adresse:** Die IP kommt aus der primären Allocation, bei `0.0.0.0` die Node-FQDN. 127.0.0.1 funktioniert nicht, weil Docker an die Allocation-IP bindet.
+- **Hintergrund-Takt:** `sfmanager:tick` läuft jede Minute über den Laravel-Scheduler: Messwerte, Absturz-Wächter, geplante Neustarts und Backups. `sfmanager:prune` löscht täglich alte Messwerte.
+- **Backups:** tar.gz im Server selbst (`/.sfmanager-backups/`, über Wings, zählt zum Speicherplatz des Servers). Inhalt: alles in `SaveGames` außer `ServerSettings.*.sav`, damit keine alten Passwörter zurückkommen.
+- **Serverlisten-Badge:** liest nur gespeicherte Messwerte (eine Anfrage für alle Zeilen, keine Live-Abfragen).
+- Weitere Rechte: Automatisierung lesen `startup.read`, ändern `startup.update`, Backups `backup.read/create/restore/delete`, Update auslösen `control.restart`.
 - **Schutz:** Login und Einrichtung sind auf 5 Versuche pro Minute begrenzt, alle Aktionen landen im Aktivitätslog des Servers.
 - API-Eigenheiten: siehe [docs/satisfactory-api.md](docs/satisfactory-api.md).
 
@@ -80,7 +84,7 @@ Blueprint-Konsole (Cronjob jede Minute): Status abfragen, Verlauf speichern (sp�
 
 Ausgewählt nach Nutzen für Serverbetreiber, Alleinstellung auf dem Blueprint-Marktplatz und Aufwand.
 
-**Stufe A: kommt in Version 1.0** (macht die Erweiterung attraktiv)
+**Stufe A: kommt in Version 1.0** (macht die Erweiterung attraktiv) ✅ Phase 3 umgesetzt
 
 | # | Extra | Warum | Aufwand |
 |---|---|---|---|
@@ -123,7 +127,7 @@ Ausgewählt nach Nutzen für Serverbetreiber, Alleinstellung auf dem Blueprint-M
 | 0 | Repo, Ordner, Dev-Workflow, Testserver | erledigt (Testserver wird erstellt) |
 | 1 | API-Client, Token-Speicher, Status-Karte, Claim-Assistent, Verbindungs-Infos, Jetzt speichern, DE/EN-Grundgerüst | ✅ MVP (Claim-Assistent noch im Browser testen) |
 | 2 | Savegame-Manager, Server- und Spieleinstellungen, Konsole, sicherer Neustart | ✅ vollständige Verwaltung (Laden, Neustart und Passwörter noch im Browser testen) |
-| 3 | Extras Stufe A (13–18), Admin-Seite | Funktionsumfang 1.0 |
+| 3 | Extras Stufe A (13–18), Admin-Seite | ✅ Funktionsumfang 1.0 (geplanter Neustart, Wächter und Update noch live testen) |
 | 4 | Übersetzungen vervollständigen, Doku, Screenshots, Icon, Marktplatz-Eintrag, Release über GitHub Actions | **Release 1.0 auf blueprint.zip** |
 | 5 | Extras Stufe B (19–24, u. a. Discord) | 1.x-Updates |
 | 6 | Mod-Manager (25) | 2.0 |

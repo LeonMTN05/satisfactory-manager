@@ -458,10 +458,22 @@ class SatisfactoryService
             'reliable_port' => $reliable,
             'reliable_port_allocated' => $reliableAllocated,
             'checks' => [
-                'game_tcp' => $this->tcpOpen($host, $port),
+                // The game port speaks TLS – a plain TCP probe would spam the server log, so ask the API instead.
+                'game_tcp' => $this->healthy($server),
                 'reliable_tcp' => $this->tcpOpen($host, $reliable),
             ],
         ];
+    }
+
+    private function healthy(Server $server): bool
+    {
+        try {
+            $this->api($server)->call('HealthCheck', ['ClientCustomData' => '']);
+
+            return true;
+        } catch (SatisfactoryApiException) {
+            return false;
+        }
     }
 
     private function tcpOpen(string $host, int $port): bool

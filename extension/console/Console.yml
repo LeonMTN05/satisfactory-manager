@@ -1,1 +1,3 @@
-# Geplante Aufgaben (z. B. Status-Polling, Discord-Benachrichtigungen) kommen in Phase 3.
+# Scheduled tasks. Laravel's scheduler (cron "php artisan schedule:run") must be active – Pterodactyl requires it anyway.
+- { Signature: "tick", Description: "Satisfactory Manager: metrics, watchdog, scheduled restarts and backups", Path: "Tick.php", Interval: "everyMinute" }
+- { Signature: "prune", Description: "Satisfactory Manager: remove old metrics", Path: "Prune.php", Interval: "daily" }

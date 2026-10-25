@@ -122,3 +122,76 @@ export const runCommand = (uuid: string, command: string): Promise<{ result: str
   http.post(`${base(uuid)}/command`, { command }).then((r) => r.data);
 export const power = (uuid: string, action: 'restart' | 'stop', save: boolean): Promise<{ save: string | null }> =>
   http.post(`${base(uuid)}/power/${action}`, { save }).then((r) => r.data);
+
+// ---- Phase 3 ----------------------------------------------------------------
+
+export interface AutomationSettings {
+  backup: { interval_hours: number; keep: number; before_restart: boolean; before_update: boolean; before_load: boolean };
+  restart: { times: string[]; only_empty: boolean };
+  watchdog: { enabled: boolean; minutes: number };
+}
+
+export interface UpdateInfo {
+  installed: string | null;
+  branch: string;
+  latest: Record<string, { build: string; updated_at: number | null }>;
+  update_available: boolean | null;
+  auto_update: boolean;
+  branch_editable: boolean;
+  check_enabled: boolean;
+}
+
+export interface Automation {
+  settings: AutomationSettings;
+  timezone: string;
+  features: { metrics: boolean; backups: boolean; restarts: boolean; watchdog: boolean; update_check: boolean };
+  update: UpdateInfo;
+}
+
+export interface Backup {
+  id: number;
+  file: string;
+  size: number;
+  reason: string;
+  session: string | null;
+  created_at: string;
+}
+
+export interface MetricPoint {
+  t: number;
+  players: number | null;
+  tick_rate: number | null;
+  tech_tier: number | null;
+  online: number;
+}
+
+export interface Badge {
+  online: boolean;
+  players: number | null;
+  player_limit: number | null;
+  tech_tier: number | null;
+}
+
+export const getAutomation = (uuid: string): Promise<Automation> =>
+  http.get(`${base(uuid)}/automation`).then((r) => r.data);
+export const saveAutomation = (uuid: string, settings: AutomationSettings): Promise<AutomationSettings> =>
+  http.put(`${base(uuid)}/automation`, settings).then((r) => r.data.settings);
+export const getBackups = (uuid: string): Promise<{ backups: Backup[]; automatic_reasons: string[] }> =>
+  http.get(`${base(uuid)}/backups`).then((r) => r.data);
+export const createBackup = (uuid: string): Promise<Backup> => http.post(`${base(uuid)}/backups`, {}, { timeout: 15 * 60 * 1000 }).then((r) => r.data);
+export const restoreBackup = (uuid: string, id: number) =>
+  http.post(`${base(uuid)}/backups/${id}/restore`, {}, { timeout: 15 * 60 * 1000 });
+export const deleteBackup = (uuid: string, id: number) => http.delete(`${base(uuid)}/backups/${id}`);
+export const getMetrics = (uuid: string, range: string): Promise<{ points: MetricPoint[]; bucket_minutes: number }> =>
+  http.get(`${base(uuid)}/metrics`, { params: { range } }).then((r) => r.data);
+export const runUpdate = (uuid: string): Promise<{ backup: string | null }> =>
+  http.post(`${base(uuid)}/update`, {}, { timeout: 15 * 60 * 1000 }).then((r) => r.data);
+export const setBranch = (uuid: string, branch: string) => http.put(`${base(uuid)}/branch`, { branch });
+
+/** One request for all server rows, shared via SWR. */
+export const useBadges = () =>
+  useSWR<Record<string, Badge>>(
+    'sfmanager:badges',
+    () => http.get('/api/client/extensions/sfmanager/badges').then((r) => r.data.servers),
+    { refreshInterval: 60000, revalidateOnFocus: false }
+  );
