@@ -5,7 +5,6 @@ import Spinner from '@/components/elements/Spinner';
 import Input from '@/components/elements/Input';
 import Select from '@/components/elements/Select';
 import { Button } from '@/components/elements/button/index';
-import { Dialog } from '@/components/elements/dialog';
 import getFileDownloadUrl from '@/api/server/files/getFileDownloadUrl';
 import { bytesToString } from '@/lib/formatters';
 import {
@@ -22,7 +21,7 @@ import {
   setBranch,
 } from '../api/sfmanager';
 import { t } from '../lang';
-import { Badge, Field, useNotify } from './ui';
+import { ConfirmDialog, Badge, Field, useNotify } from './ui';
 
 const INTERVALS = [0, 1, 2, 3, 6, 12, 24];
 
@@ -331,7 +330,7 @@ export default ({ uuid, onChange }: { uuid: string; onChange: () => void }) => {
 
       {saveBar}
 
-      <Dialog.Confirm
+      <ConfirmDialog
         open={!!pending}
         onClose={() => setPending(null)}
         title={
@@ -347,7 +346,7 @@ export default ({ uuid, onChange }: { uuid: string; onChange: () => void }) => {
         {pending?.kind === 'restore' && t('backup.confirmRestore', date(pending.backup))}
         {pending?.kind === 'delete' && t('backup.confirmDelete', date(pending.backup))}
         {pending?.kind === 'update' && t('update.confirm')}
-      </Dialog.Confirm>
+      </ConfirmDialog>
     </div>
   );
 };

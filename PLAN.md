@@ -128,7 +128,7 @@ Ausgewählt nach Nutzen für Serverbetreiber, Alleinstellung auf dem Blueprint-M
 | 1 | API-Client, Token-Speicher, Status-Karte, Claim-Assistent, Verbindungs-Infos, Jetzt speichern, DE/EN-Grundgerüst | ✅ MVP (Claim-Assistent noch im Browser testen) |
 | 2 | Savegame-Manager, Server- und Spieleinstellungen, Konsole, sicherer Neustart | ✅ vollständige Verwaltung (Laden, Neustart und Passwörter noch im Browser testen) |
 | 3 | Extras Stufe A (13–18), Admin-Seite | ✅ Funktionsumfang 1.0 (geplanter Neustart, Wächter und Update noch live testen) |
-| 4 | Übersetzungen vervollständigen, Doku, Screenshots, Icon, Marktplatz-Eintrag, Release über GitHub Actions | **Release 1.0 auf blueprint.zip** |
+| 4 | Übersetzungen vervollständigen, Doku, Screenshots, Icon, Marktplatz-Eintrag, Release über GitHub Actions | ✅ v1.0.0 fertig – offen: Screenshots, Eintrag auf blueprint.zip |
 | 5 | Extras Stufe B (19–24, u. a. Discord) | 1.x-Updates |
 | 6 | Mod-Manager (25) | 2.0 |
 

@@ -4,7 +4,6 @@ import { faSave, faUpload } from '@fortawesome/free-solid-svg-icons';
 import TitledGreyBox from '@/components/elements/TitledGreyBox';
 import Spinner from '@/components/elements/Spinner';
 import { Button } from '@/components/elements/button/index';
-import { Dialog } from '@/components/elements/dialog';
 import getFileUploadUrl from '@/api/server/files/getFileUploadUrl';
 import getFileDownloadUrl from '@/api/server/files/getFileDownloadUrl';
 import {
@@ -18,7 +17,7 @@ import {
   setAutoload,
 } from '../api/sfmanager';
 import { t } from '../lang';
-import { Badge, defaultSaveName, formatDuration, formatSaveDate, useNotify } from './ui';
+import { ConfirmDialog, Badge, defaultSaveName, formatDuration, formatSaveDate, useNotify } from './ui';
 
 type Pending =
   | { kind: 'load'; save: SaveHeader }
@@ -243,7 +242,7 @@ export default ({ uuid, onChange }: { uuid: string; onChange: () => void }) => {
         ))
       )}
 
-      <Dialog.Confirm
+      <ConfirmDialog
         open={!!pending}
         onClose={() => setPending(null)}
         title={pending?.kind === 'load' ? t('saves.load') : t('common.delete')}
@@ -277,7 +276,7 @@ export default ({ uuid, onChange }: { uuid: string; onChange: () => void }) => {
         )}
         {pending?.kind === 'delete' && <p>{t('saves.confirmDelete', pending.save.saveName)}</p>}
         {pending?.kind === 'deleteSession' && <p>{t('saves.confirmDeleteSession', pending.session, pending.count)}</p>}
-      </Dialog.Confirm>
+      </ConfirmDialog>
     </div>
   );
 };

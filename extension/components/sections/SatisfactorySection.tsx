@@ -4,7 +4,8 @@ import ServerContentBlock from '@/components/elements/ServerContentBlock';
 import FlashMessageRender from '@/components/FlashMessageRender';
 import Spinner from '@/components/elements/Spinner';
 import { ServerContext } from '@/state/server';
-import { useStatus } from '../api/sfmanager';
+import { errorCode, useStatus } from '../api/sfmanager';
+import TitledGreyBox from '@/components/elements/TitledGreyBox';
 import { t } from '../lang';
 import { FLASH_KEY } from '../elements/ui';
 import StatusCard from '../elements/StatusCard';
@@ -23,7 +24,7 @@ type Tab = 'overview' | 'saves' | 'automation' | 'settings' | 'console';
 const SatisfactorySection = () => {
   const uuid = ServerContext.useStoreState((state) => state.server.data!.uuid);
   const serverName = ServerContext.useStoreState((state) => state.server.data!.name);
-  const { data: status, revalidate } = useStatus(uuid);
+  const { data: status, error, revalidate } = useStatus(uuid);
   const [tab, setTab] = useState<Tab>('overview');
 
   const refresh = () => {
@@ -56,7 +57,11 @@ const SatisfactorySection = () => {
           ))}
         </div>
       )}
-      {!status ? (
+      {errorCode(error) === 'sfm_not_satisfactory' ? (
+        <TitledGreyBox title={t('title')}>
+          <p className={'text-neutral-300'}>{t('notSatisfactory')}</p>
+        </TitledGreyBox>
+      ) : !status ? (
         <Spinner centered size={'large'} />
       ) : current === 'saves' ? (
         <SavesTab uuid={uuid} onChange={refresh} />

@@ -6,6 +6,7 @@ use Pterodactyl\Http\Middleware\Activity\ServerSubject;
 use Pterodactyl\Http\Middleware\Api\Client\Server\AuthenticateServerAccess;
 use Pterodactyl\Http\Middleware\Api\Client\Server\ResourceBelongsToServer;
 use Pterodactyl\BlueprintFramework\Extensions\sfmanager\Http\Controllers\ServerController;
+use Pterodactyl\BlueprintFramework\Extensions\sfmanager\Http\Middleware\EnsureSatisfactory;
 use Pterodactyl\BlueprintFramework\Extensions\sfmanager\Http\Controllers\AutomationController;
 
 Route::get('/ping', fn () => ['ok' => true, 'version' => '{version}']);
@@ -14,7 +15,7 @@ Route::get('/badges', [AutomationController::class, 'badges']);
 
 Route::group([
     'prefix' => '/servers/{server}',
-    'middleware' => [ServerSubject::class, AuthenticateServerAccess::class, ResourceBelongsToServer::class],
+    'middleware' => [ServerSubject::class, AuthenticateServerAccess::class, ResourceBelongsToServer::class, EnsureSatisfactory::class],
 ], function () {
     Route::get('/status', [ServerController::class, 'status']);
     Route::get('/connection', [ServerController::class, 'connection'])->middleware('throttle:20,1,sfmanager');

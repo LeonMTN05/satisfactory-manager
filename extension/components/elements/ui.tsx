@@ -1,7 +1,9 @@
 import React from 'react';
 import classNames from 'classnames';
+import { Dialog } from '@/components/elements/dialog';
+import { Button } from '@/components/elements/button/index';
 import useFlash from '@/plugins/useFlash';
-import { errorText } from '../lang';
+import { errorText, t } from '../lang';
 
 export const FLASH_KEY = 'sfmanager';
 
@@ -70,4 +72,35 @@ export const Badge = ({ children, className }: { children: React.ReactNode; clas
   <span className={classNames('text-xs px-2 py-0.5 rounded bg-neutral-600 text-neutral-100 ml-2', className)}>
     {children}
   </span>
+);
+
+/** Like the panel's Dialog.Confirm, but with translated buttons. */
+export const ConfirmDialog = ({
+  open,
+  title,
+  confirm,
+  onClose,
+  onConfirmed,
+  danger = true,
+  children,
+}: {
+  open: boolean;
+  title: string;
+  confirm: string;
+  onClose: () => void;
+  onConfirmed: () => void;
+  danger?: boolean;
+  children: React.ReactNode;
+}) => (
+  <Dialog open={open} onClose={onClose} title={title}>
+    <div className={'text-neutral-200'}>{children}</div>
+    <Dialog.Footer>
+      <Button.Text onClick={onClose}>{t('common.cancel')}</Button.Text>
+      {danger ? (
+        <Button.Danger onClick={onConfirmed}>{confirm}</Button.Danger>
+      ) : (
+        <Button onClick={onConfirmed}>{confirm}</Button>
+      )}
+    </Dialog.Footer>
+  </Dialog>
 );

@@ -3,10 +3,9 @@ import classNames from 'classnames';
 import { faServer } from '@fortawesome/free-solid-svg-icons';
 import TitledGreyBox from '@/components/elements/TitledGreyBox';
 import { Button } from '@/components/elements/button/index';
-import { Dialog } from '@/components/elements/dialog';
 import { Status, logout, power, saveGame } from '../api/sfmanager';
 import { t } from '../lang';
-import { Dot, Stat, defaultSaveName, formatDuration, formatPhase, useNotify } from './ui';
+import { ConfirmDialog, Dot, Stat, defaultSaveName, formatDuration, formatPhase, useNotify } from './ui';
 
 interface Props {
   uuid: string;
@@ -118,7 +117,7 @@ export default ({ uuid, status, onChange }: Props) => {
           )}
         </>
       )}
-      <Dialog.Confirm
+      <ConfirmDialog
         open={!!confirm}
         onClose={() => setConfirm(null)}
         title={confirm === 'stop' ? t('power.stop') : t('power.restart')}
@@ -126,7 +125,7 @@ export default ({ uuid, status, onChange }: Props) => {
         onConfirmed={doPower}
       >
         {confirm === 'stop' ? t('power.confirmStop') : t('power.confirmRestart')}
-      </Dialog.Confirm>
+      </ConfirmDialog>
     </TitledGreyBox>
   );
 };

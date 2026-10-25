@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- Satisfactory Manager icon – original artwork, not affiliated with Coffee Stain Studios. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#26313b"/>
+      <stop offset="1" stop-color="#11171d"/>
+    </linearGradient>
+    <linearGradient id="gear" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffb347"/>
+      <stop offset="1" stop-color="#f07f1a"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="48" fill="url(#bg)"/>
+  <path d="M197.6,105.0 L197.6,119.0 L182.7,123.9 L179.3,134.6 L188.5,147.3 L180.2,158.6 L165.3,153.8 L156.2,160.4 L156.2,176.1 L142.8,180.4 L133.6,167.7 L122.4,167.7 L113.2,180.4 L99.8,176.1 L99.8,160.4 L90.7,153.8 L75.8,158.6 L67.5,147.3 L76.7,134.6 L73.3,123.9 L58.4,119.0 L58.4,105.0 L73.3,100.1 L76.7,89.4 L67.5,76.7 L75.8,65.4 L90.7,70.2 L99.8,63.6 L99.8,47.9 L113.2,43.6 L122.4,56.3 L133.6,56.3 L142.8,43.6 L156.2,47.9 L156.2,63.6 L165.3,70.2 L180.2,65.4 L188.5,76.7 L179.3,89.4 L182.7,100.1 Z" fill="url(#gear)"/>
+  <circle cx="128" cy="112" r="30" fill="#1b232b"/>
+  <circle cx="128" cy="112" r="14" fill="url(#gear)"/>
+  <!-- conveyor belt -->
+  <rect x="36" y="196" width="184" height="22" rx="11" fill="#3a4753"/>
+  <g fill="#f07f1a">
+    <rect x="58" y="202" width="22" height="10" rx="3"/>
+    <rect x="100" y="202" width="22" height="10" rx="3"/>
+    <rect x="142" y="202" width="22" height="10" rx="3"/>
+    <rect x="184" y="202" width="22" height="10" rx="3"/>
+  </g>
+  <!-- status dot -->
+  <circle cx="206" cy="50" r="20" fill="#11171d"/>
+  <circle cx="206" cy="50" r="13" fill="#3ddc84"/>
+</svg>

@@ -1,13 +1,13 @@
 info:
   name: "Satisfactory Manager"
   identifier: "sfmanager"
-  description: "Status, Savegames, Server-Einstellungen und Extras für Satisfactory Dedicated Server."
+  description: "Manage Satisfactory dedicated servers: status, savegames, backups, settings, scheduled restarts, watchdog and updates."
   flags: ""
-  version: "0.1.0-dev"
+  version: "1.0.0"
   target: "beta-2026-08"
   author: "Leon Elias"
-  icon: ""
-  website: ""
+  icon: "icon.svg"
+  website: "https://github.com/LeonMTN05/satisfactory-manager"
 
 admin:
   view: "admin/view.blade.php"

@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+
+      - name: PHP syntax check
+        run: |
+          # Blueprint replaces these placeholders on install – substitute them for the check.
+          tmp=$(mktemp -d)
+          cp -r extension "$tmp/"
+          find "$tmp" -name '*.php' -exec sed -i 's/{identifier}/sfmanager/g; s/{version}/0.0.0/g' {} +
+          find "$tmp" -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Check for TSX expressions Blueprint would treat as placeholders
+        run: |
+          if grep -rnE '\{(name|version|identifier|author|random|timestamp|mode|target|root|webroot|engine|fs)\}' extension/components; then
+            echo "::error::Rename these expressions – Blueprint replaces them on install."
+            exit 1
+          fi
+
+      - name: Build package
+        run: ./scripts/package.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sfmanager-blueprint
+          path: dist/sfmanager.blueprint

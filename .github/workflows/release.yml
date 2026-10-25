@@ -1,0 +1,41 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check version in conf.yml matches the tag
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          conf=$(grep -m1 'version:' extension/conf.yml | sed -E 's/.*"(.*)".*/\1/')
+          if [ "$tag" != "$conf" ]; then
+            echo "::error::Tag v$tag does not match conf.yml version $conf"
+            exit 1
+          fi
+
+      - name: Build package
+        run: ./scripts/package.sh
+
+      - name: Release notes from CHANGELOG.md
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          awk -v v="$tag" '
+            $0 ~ "^## \\[" v "\\]" { found=1; next }
+            found && /^## \[/ { exit }
+            found { print }
+          ' CHANGELOG.md > notes.md
+          printf '\n---\nInstall: `blueprint -install sfmanager` with the attached file in your Pterodactyl folder.\n' >> notes.md
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/sfmanager.blueprint --title "Satisfactory Manager $GITHUB_REF_NAME" --notes-file notes.md

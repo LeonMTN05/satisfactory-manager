@@ -3,6 +3,7 @@ import { httpErrorToHuman } from '@/api/http';
 
 const en = {
   title: 'Satisfactory',
+  notSatisfactory: 'This server does not run Satisfactory, so there is nothing to manage here.',
   'status.title': 'Server status',
   'status.online': 'Online',
   'status.offline': 'Offline',
@@ -226,6 +227,7 @@ export type Key = keyof typeof en;
 
 const de: Record<Key, string> = {
   title: 'Satisfactory',
+  notSatisfactory: 'Auf diesem Server läuft kein Satisfactory – hier gibt es nichts zu verwalten.',
   'status.title': 'Serverstatus',
   'status.online': 'Online',
   'status.offline': 'Offline',
