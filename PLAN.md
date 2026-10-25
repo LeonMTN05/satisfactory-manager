@@ -44,6 +44,7 @@ Blueprint-Konsole (Cronjob jede Minute): Status abfragen, Verlauf speichern (sp�
 - **Rechte für Unternutzer:** Aktionen sind an vorhandene Pterodactyl-Rechte gekoppelt:
   - Status und Verbindung: `websocket.connect` (wer die Konsole sehen darf)
   - Jetzt speichern: `control.console`
+  - Neues Spiel: `control.restart`
   - Einrichten, Admin-Login, Abmelden: `startup.update`
   - geplant: `file.read` für Save-Download, `file.update` für Save-Upload, `control.restart` für Laden und Neustart
 - **Token:** Das Admin-Passwort wird nur einmal für `PasswordLogin` gebraucht. Gespeichert wird nur das Token, verschlüsselt mit Laravels `encrypt()`.
@@ -60,6 +61,7 @@ Blueprint-Konsole (Cronjob jede Minute): Status abfragen, Verlauf speichern (sp�
 4. **Jetzt speichern**: `SaveGame` mit Namen.
 
 ### Savegame-Manager
+- „Neues Spiel“-Karte ✅ (aus Phase 2 vorgezogen)
 5. Liste aller Sessions und Saves (Datum, Spielzeit, Build-Version, modded ja/nein).
 6. Herunterladen, Hochladen (optional gleich laden), Laden, Löschen, Auto-Load-Session festlegen.
 7. **Neues Spiel** mit Startgebiet und „Onboarding überspringen“.

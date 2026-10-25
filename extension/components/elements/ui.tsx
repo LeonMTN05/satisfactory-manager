@@ -13,6 +13,7 @@ export const useNotify = () => {
     success: (message: string) => addFlash({ key: FLASH_KEY, type: 'success', message }),
     error: (error: any) => addFlash({ key: FLASH_KEY, type: 'error', message: errorText(error) }),
     errorText: (message: string) => addFlash({ key: FLASH_KEY, type: 'error', message }),
+    warning: (message: string) => addFlash({ key: FLASH_KEY, type: 'warning', message }),
   };
 };
 

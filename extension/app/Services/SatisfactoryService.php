@@ -177,10 +177,14 @@ class SatisfactoryService
 
     /**
      * Claims an unclaimed server, optionally sets a player password and starts a new game.
+     * Once the claim worked, later steps do not fail the whole request: their errors
+     * are returned as warnings (error codes) so the user knows what is left to do.
+     *
+     * @return string[] error codes of follow-up steps that failed
      *
      * @throws SatisfactoryApiException
      */
-    public function claim(Server $server, string $serverName, string $adminPassword, ?string $clientPassword, ?array $newGame): void
+    public function claim(Server $server, string $serverName, string $adminPassword, ?string $clientPassword, ?array $newGame): array
     {
         $api = $this->api($server);
         $initial = $this->passwordless($api, 'InitialAdmin');
@@ -198,20 +202,52 @@ class SatisfactoryService
         }
         $this->storeToken($server, $token);
 
-        $admin = $api->withToken($token);
+        $warnings = [];
         if ($clientPassword) {
-            $admin->call('SetClientPassword', ['Password' => $clientPassword]);
+            try {
+                $api->withToken($token)->call('SetClientPassword', ['Password' => $clientPassword]);
+            } catch (SatisfactoryApiException $e) {
+                $warnings[] = 'sfm_client_password_failed';
+            }
         }
         if ($newGame) {
-            $admin->call('CreateNewGame', ['NewGameData' => [
-                'SessionName' => $newGame['session_name'],
+            try {
+                $this->newGame($server, $newGame['session_name'], $newGame['starting_location'], (bool) ($newGame['skip_onboarding'] ?? false));
+            } catch (SatisfactoryApiException $e) {
+                $warnings[] = 'sfm_new_game_failed';
+            }
+        }
+
+        return $warnings;
+    }
+
+    /**
+     * Creates and loads a new game. The server only answers once the map is loaded (~15 s or more).
+     *
+     * @throws SatisfactoryApiException
+     */
+    public function newGame(Server $server, string $sessionName, string $startingLocation, bool $skipOnboarding): void
+    {
+        $api = $this->adminApi($server);
+        try {
+            $api->call('CreateNewGame', ['NewGameData' => [
+                'SessionName' => $sessionName,
                 'MapName' => '',
-                'StartingLocation' => $newGame['starting_location'],
-                'bSkipOnboarding' => (bool) $newGame['skip_onboarding'],
+                'StartingLocation' => $startingLocation,
+                'bSkipOnboarding' => $skipOnboarding,
                 'AdvancedGameSettings' => (object) [],
                 'CustomOptionsOnlyForModding' => (object) [],
-            ]]);
+                // Required since late-2026 builds; an empty object means "default game mode".
+                'GameModeSettings' => (object) [],
+            ]], 50);
+        } catch (SatisfactoryApiException $e) {
+            // nginx cuts requests at 60 s. A timeout here means the map is still loading,
+            // which the status card will show – only real errors are passed on.
+            if ($e->errorCode !== 'sfm_unreachable') {
+                throw $e;
+            }
         }
+        $this->forgetStatus($server);
     }
 
     /** @throws SatisfactoryApiException */
@@ -242,7 +278,7 @@ class SatisfactoryService
         }
 
         // Saving a big factory can take a while.
-        $api->call('SaveGame', ['SaveName' => $name], 60);
+        $api->call('SaveGame', ['SaveName' => $name], 50);
         $this->forgetStatus($server);
     }
 

@@ -36,7 +36,7 @@ export interface ClaimData {
   server_name: string;
   admin_password: string;
   client_password?: string;
-  new_game?: { session_name: string; starting_location: string; skip_onboarding: boolean };
+  new_game?: NewGame;
 }
 
 export const STARTING_LOCATIONS = ['Grass Fields', 'Rocky Desert', 'Northern Forest', 'Dune Desert'];
@@ -51,7 +51,17 @@ export const useStatus = (uuid: string) =>
 export const getConnection = (uuid: string): Promise<Connection> =>
   http.get(`${base(uuid)}/connection`).then((r) => r.data);
 
-export const claimServer = (uuid: string, data: ClaimData) => http.post(`${base(uuid)}/claim`, data);
+export interface NewGame {
+  session_name: string;
+  starting_location: string;
+  skip_onboarding: boolean;
+}
+
+/** Resolves with error codes of follow-up steps that failed (e.g. new game). */
+export const claimServer = (uuid: string, data: ClaimData): Promise<string[]> =>
+  http.post(`${base(uuid)}/claim`, data).then((r) => r.data.warnings || []);
+
+export const newGame = (uuid: string, data: NewGame) => http.post(`${base(uuid)}/new-game`, data);
 
 export const login = (uuid: string, password: string) => http.post(`${base(uuid)}/login`, { password });
 

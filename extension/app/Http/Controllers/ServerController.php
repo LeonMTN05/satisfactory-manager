@@ -11,6 +11,7 @@ use Pterodactyl\BlueprintFramework\Extensions\sfmanager\Services\SatisfactorySer
 use Pterodactyl\BlueprintFramework\Extensions\sfmanager\Http\Requests\ClaimRequest;
 use Pterodactyl\BlueprintFramework\Extensions\sfmanager\Http\Requests\LoginRequest;
 use Pterodactyl\BlueprintFramework\Extensions\sfmanager\Http\Requests\LogoutRequest;
+use Pterodactyl\BlueprintFramework\Extensions\sfmanager\Http\Requests\NewGameRequest;
 use Pterodactyl\BlueprintFramework\Extensions\sfmanager\Http\Requests\SaveGameRequest;
 use Pterodactyl\BlueprintFramework\Extensions\sfmanager\Http\Requests\ViewStatusRequest;
 
@@ -31,9 +32,9 @@ class ServerController extends ClientApiController
         return new JsonResponse($this->service->connection($server));
     }
 
-    public function claim(ClaimRequest $request, Server $server): Response
+    public function claim(ClaimRequest $request, Server $server): JsonResponse
     {
-        $this->service->claim(
+        $warnings = $this->service->claim(
             $server,
             $request->input('server_name'),
             $request->input('admin_password'),
@@ -43,6 +44,22 @@ class ServerController extends ClientApiController
 
         Activity::event('server:sfmanager.claim')
             ->property('name', $request->input('server_name'))
+            ->log();
+
+        return new JsonResponse(['warnings' => $warnings]);
+    }
+
+    public function newGame(NewGameRequest $request, Server $server): Response
+    {
+        $this->service->newGame(
+            $server,
+            $request->input('session_name'),
+            $request->input('starting_location'),
+            $request->boolean('skip_onboarding'),
+        );
+
+        Activity::event('server:sfmanager.new-game')
+            ->property('name', $request->input('session_name'))
             ->log();
 
         return $this->returnNoContent();

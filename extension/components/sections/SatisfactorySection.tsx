@@ -10,6 +10,7 @@ import StatusCard from '../elements/StatusCard';
 import ClaimWizard from '../elements/ClaimWizard';
 import LoginCard from '../elements/LoginCard';
 import ConnectionCard from '../elements/ConnectionCard';
+import NewGameCard from '../elements/NewGameCard';
 
 const SatisfactorySection = () => {
   const uuid = ServerContext.useStoreState((state) => state.server.data!.uuid);
@@ -34,6 +35,9 @@ const SatisfactorySection = () => {
             )}
             {status.reachable && (status.access === 'none' || status.access === 'client') && (
               <LoginCard uuid={uuid} onDone={refresh} />
+            )}
+            {status.reachable && status.access === 'admin' && (
+              <NewGameCard uuid={uuid} defaultName={serverName} onDone={refresh} />
             )}
           </div>
           <div>

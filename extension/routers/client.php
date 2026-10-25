@@ -15,6 +15,7 @@ Route::group([
 ], function () {
     Route::get('/status', [ServerController::class, 'status']);
     Route::get('/connection', [ServerController::class, 'connection'])->middleware('throttle:20,1,sfmanager');
+    Route::post('/new-game', [ServerController::class, 'newGame'])->middleware('throttle:20,1,sfmanager');
     Route::post('/save', [ServerController::class, 'save'])->middleware('throttle:20,1,sfmanager');
 
     // Password-related actions are rate-limited against brute force.

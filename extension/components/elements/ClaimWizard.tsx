@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { faMagic } from '@fortawesome/free-solid-svg-icons';
 import TitledGreyBox from '@/components/elements/TitledGreyBox';
 import Input from '@/components/elements/Input';
-import Select from '@/components/elements/Select';
 import { Button } from '@/components/elements/button/index';
-import { STARTING_LOCATIONS, claimServer } from '../api/sfmanager';
+import { NewGame, STARTING_LOCATIONS, claimServer } from '../api/sfmanager';
 import { t } from '../lang';
 import { Field, useNotify } from './ui';
+import NewGameFields from './NewGameFields';
 
 export default ({ uuid, defaultName, onDone }: { uuid: string; defaultName: string; onDone: () => void }) => {
   const notify = useNotify();
@@ -16,9 +16,11 @@ export default ({ uuid, defaultName, onDone }: { uuid: string; defaultName: stri
   const [adminRepeat, setAdminRepeat] = useState('');
   const [clientPassword, setClientPassword] = useState('');
   const [newGame, setNewGame] = useState(true);
-  const [sessionName, setSessionName] = useState(defaultName);
-  const [location, setLocation] = useState(STARTING_LOCATIONS[0]);
-  const [skipOnboarding, setSkipOnboarding] = useState(false);
+  const [game, setGame] = useState<NewGame>({
+    session_name: defaultName,
+    starting_location: STARTING_LOCATIONS[0],
+    skip_onboarding: false,
+  });
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,12 +33,11 @@ export default ({ uuid, defaultName, onDone }: { uuid: string; defaultName: stri
       server_name: serverName,
       admin_password: adminPassword,
       client_password: clientPassword || undefined,
-      new_game: newGame
-        ? { session_name: sessionName, starting_location: location, skip_onboarding: skipOnboarding }
-        : undefined,
+      new_game: newGame ? game : undefined,
     })
-      .then(() => {
+      .then((warnings) => {
         notify.success(t('claim.done'));
+        warnings.forEach((w) => notify.warning(t(`claim.warn.${w}` as any)));
         onDone();
       })
       .catch(notify.error)
@@ -84,33 +85,13 @@ export default ({ uuid, defaultName, onDone }: { uuid: string; defaultName: stri
         </label>
 
         {newGame && (
-          <div className={'grid md:grid-cols-2 gap-x-4 pl-6 border-l-2 border-neutral-600 mb-4'}>
-            <Field label={t('claim.sessionName')}>
-              <Input value={sessionName} maxLength={64} onChange={(e) => setSessionName(e.currentTarget.value)} />
-            </Field>
-            <Field label={t('claim.startingLocation')}>
-              <Select value={location} onChange={(e) => setLocation(e.currentTarget.value)}>
-                {STARTING_LOCATIONS.map((l) => (
-                  <option key={l} value={l}>
-                    {l}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-            <label className={'flex items-center text-sm cursor-pointer'}>
-              <input
-                type={'checkbox'}
-                className={'mr-2'}
-                checked={skipOnboarding}
-                onChange={(e) => setSkipOnboarding(e.currentTarget.checked)}
-              />
-              {t('claim.skipOnboarding')}
-            </label>
+          <div className={'pl-6 border-l-2 border-neutral-600 mb-4'}>
+            <NewGameFields value={game} onChange={setGame} />
           </div>
         )}
 
         <div className={'flex justify-end'}>
-          <Button type={'submit'} disabled={busy || !serverName || !adminPassword || (newGame && !sessionName)}>
+          <Button type={'submit'} disabled={busy || !serverName || !adminPassword || (newGame && !game.session_name)}>
             {t('claim.submit')}
           </Button>
         </div>
