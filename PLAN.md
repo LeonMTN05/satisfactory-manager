@@ -9,8 +9,8 @@ Blueprint-Erweiterung für Pterodactyl, die Satisfactory Dedicated Server direkt
 | Panel | Pterodactyl 1.15.2, Blueprint beta-2026-08, Developer-Modus **an** |
 | Node | `paprika.kindergulasch.de`, Wings + Docker laufen, 4 CPU / 15 GB RAM |
 | Egg | „Satisfactory“ (ID 15) importiert, Ports 7777 (Spiel + HTTPS-API) und 8888 (Reliable) |
-| Testserver | **noch keiner angelegt** |
-| GitHub | `gh` installiert, aber **noch nicht eingeloggt** |
+| Testserver | wird gerade erstellt |
+| GitHub | https://github.com/LeonMTN05/satisfactory-manager (öffentlich) |
 
 ## Technische Grundlage
 
@@ -37,7 +37,7 @@ Laravel-Controller (Pterodactyl-Rechte prüfen) ──► SatisfactoryApiClient 
 DB: sfmanager_servers (Token verschlüsselt),        https://<allocation>:7777/api/v1
     sfmanager_metrics, sfmanager_webhooks
         ▲
-Blueprint-Konsole (Cronjob jede Minute): Status abfragen, Verlauf speichern, Discord-Meldungen
+Blueprint-Konsole (Cronjob jede Minute): Status abfragen, Verlauf speichern (später auch Discord-Meldungen)
 ```
 
 - **Nur für Satisfactory-Server sichtbar:** Blueprint kann den Tab im Admin-Bereich auf bestimmte Eggs begrenzen (eingebaut).
@@ -75,19 +75,19 @@ Ausgewählt nach Nutzen für Serverbetreiber, Alleinstellung auf dem Blueprint-M
 |---|---|---|---|
 | 13 | **Badge in der Serverliste**: „● 2/4 · Tier 5“ auf der Server-Übersicht | Auf jedem Screenshot sofort zu sehen, starkes Verkaufsargument | klein |
 | 14 | **Save-Backups mit Wiederherstellung per Klick**: automatisch vor Update, Neustart und Laden sowie zeitgesteuert, mit Rotation (Anzahl/Alter einstellbar) | Häufigstes Problem: kaputte oder verlorene Saves | mittel |
-| 15 | **Discord-Webhooks**: online/offline, Absturz erkannt, Spielerzahl ändert sich, Save/Backup erstellt, Update verfügbar. Ereignisse einzeln wählbar, Vorschau, Test-Button | Wird bei Gameserver-Erweiterungen sehr oft gewünscht | mittel |
-| 16 | **Verlauf und Diagramme**: Spieler, Tickrate und Tech-Tier über 24 h / 7 Tage / 30 Tage | Tickrate zeigt Lag durch große Fabriken früh | mittel |
-| 17 | **Update-Center**: installierte Build mit der neuesten Steam-Build vergleichen (App 1690800), Branch-Schalter public/experimental (`SRCDS_BETAID`), „Backup → Update → Neustart“ in einem Schritt | Updates sind bei Satisfactory der häufigste Bruchpunkt | mittel |
-| 18 | **Geplante Neustarts mit Sicherheitsnetz**: zur gewünschten Zeit erst speichern, dann neu starten. Optional nur, wenn niemand online ist | Pterodactyl-Zeitpläne können nicht über die API speichern | klein |
-| 19 | **Absturz-Wächter**: Server antwortet nicht mehr auf `HealthCheck` → Neustart, Discord-Meldung, letzte Logzeilen anzeigen | Spart nachts manuelles Eingreifen | klein |
+| 15 | **Verlauf und Diagramme**: Spieler, Tickrate und Tech-Tier über 24 h / 7 Tage / 30 Tage | Tickrate zeigt Lag durch große Fabriken früh | mittel |
+| 16 | **Update-Center**: installierte Build mit der neuesten Steam-Build vergleichen (App 1690800), Branch-Schalter public/experimental (`SRCDS_BETAID`), „Backup → Update → Neustart“ in einem Schritt | Updates sind bei Satisfactory der häufigste Bruchpunkt | mittel |
+| 17 | **Geplante Neustarts mit Sicherheitsnetz**: zur gewünschten Zeit erst speichern, dann neu starten. Optional nur, wenn niemand online ist | Pterodactyl-Zeitpläne können nicht über die API speichern | klein |
+| 18 | **Absturz-Wächter**: Server antwortet nicht mehr auf `HealthCheck` → Neustart, letzte Logzeilen anzeigen | Spart nachts manuelles Eingreifen | klein |
 
 **Stufe B: Version 1.x** (nette Extras)
 
 | # | Extra | Warum |
 |---|---|---|
+| 19 | **Discord-Webhooks**: online/offline, Absturz erkannt, Spielerzahl ändert sich, Save/Backup erstellt, Update verfügbar, Meilensteine. Ereignisse einzeln wählbar, Test-Button | Wird bei Gameserver-Erweiterungen sehr oft gewünscht |
 | 20 | **Netzwerk-Tuning**: bekannte Bandbreiten-Einstellungen in Engine.ini/Game.ini per Schalter, mit Backup der Originaldatei | Beliebter Fix gegen Gummiband-Effekte |
 | 21 | **Öffentliches Status-Widget**: abschaltbarer Link bzw. Bild-Badge (online, Spieler, Tier) für Website oder Discord | Betreiber zeigen ihren Server gern her |
-| 22 | **Fabrik-Steckbrief**: Spielzeit, Tier, Phase, Session-Historie und Meilensteine („Tier 7 erreicht am …“, auch als Discord-Meldung) | Stärkt die Spielerbindung |
+| 22 | **Fabrik-Steckbrief**: Spielzeit, Tier, Phase, Session-Historie und Meilensteine („Tier 7 erreicht am …“) | Stärkt die Spielerbindung |
 | 23 | **Save-Transfer-Assistent**: Einzelspieler-Save hochladen, prüfen (Build-Version, Mods) und als Auto-Load-Session setzen | Häufigste Anfrage neuer Serverbetreiber |
 | 24 | **Ressourcen-Empfehlung**: RAM-Verbrauch mit dem Limit vergleichen und Hinweis bei Engpass | Satisfactory braucht viel RAM, Abstürze durch OOM sind häufig |
 
@@ -100,21 +100,21 @@ Ausgewählt nach Nutzen für Serverbetreiber, Alleinstellung auf dem Blueprint-M
 **Bewusst nicht geplant:** Spielernamen, Kick/Ban und Chat. Die Satisfactory-API bietet das nicht, ein Workaround wäre unzuverlässig.
 
 ### Grundlage für alle Funktionen
-- **Admin-Seite**: alle Satisfactory-Server auf einen Blick, globale Standardwerte (Polling-Intervall, Backup-Rotation, Discord), jede Funktion einzeln abschaltbar.
+- **Admin-Seite**: alle Satisfactory-Server auf einen Blick, globale Standardwerte (Polling-Intervall, Backup-Rotation), jede Funktion einzeln abschaltbar.
 - **Sprachen**: Deutsch und Englisch ab 1.0. Der Marktplatz ist international.
 - **Sicherheit**: Token verschlüsselt speichern. Verbindungen nur zu Allocations des jeweiligen Servers, damit niemand über das Panel beliebige Adressen ansteuern kann (SSRF-Schutz). Jede Aktion prüft die passenden Unternutzer-Rechte.
-- **Datenschutz**: keine Telemetrie. Externe Abfragen (Steam-Build, Discord) passieren nur, wenn sie eingeschaltet sind.
+- **Datenschutz**: keine Telemetrie. Externe Abfragen (Steam-Build, später Discord) passieren nur, wenn sie eingeschaltet sind.
 
 ## Phasen
 
 | Phase | Inhalt | Ergebnis |
 |---|---|---|
-| 0 | Repo, Ordner, Dev-Workflow, Testserver | größtenteils erledigt (GitHub-Login und Testserver fehlen) |
+| 0 | Repo, Ordner, Dev-Workflow, Testserver | erledigt (Testserver wird erstellt) |
 | 1 | API-Client, Token-Speicher, Status-Karte, Claim-Assistent, Verbindungs-Infos, Jetzt speichern | MVP |
 | 2 | Savegame-Manager, Server- und Spieleinstellungen, Konsole, sicherer Neustart | vollständige Verwaltung |
-| 3 | Extras Stufe A (13–19), Admin-Seite | Funktionsumfang 1.0 |
+| 3 | Extras Stufe A (13–18), Admin-Seite | Funktionsumfang 1.0 |
 | 4 | Übersetzungen DE/EN, Doku, Screenshots, Icon, Marktplatz-Eintrag, Release über GitHub Actions | **Release 1.0 auf blueprint.zip** |
-| 5 | Extras Stufe B (20–24) | 1.x-Updates |
+| 5 | Extras Stufe B (19–24, u. a. Discord) | 1.x-Updates |
 | 6 | Mod-Manager (25) | 2.0 |
 
 ## Veröffentlichung (Blueprint-Marktplatz)
@@ -148,5 +148,5 @@ satisfactory-manager/
 - Öffentliches GitHub-Repo ✅
 - Ziel: Veröffentlichung auf dem Blueprint-Marktplatz ✅
 
-## Offen
-- **Lizenz**: Empfehlung MIT (passt zu einem öffentlichen Repo). Alternativ eine Lizenz, die Weiterverkauf verbietet.
+- Lizenz: MIT ✅
+- Discord-Meldungen erst nach 1.0 (Stufe B) ✅

@@ -25,3 +25,7 @@ Dies ist ein inoffizielles Community-Projekt. Es steht in keiner Verbindung zu d
 - **ficsit.app** und der Satisfactory Mod Loader (SML) gehören der Satisfactory-Modding-Community.
 
 Alle Marken gehören ihren jeweiligen Inhabern. Von mir stammt nur der Code dieser Erweiterung.
+
+## Lizenz
+
+[MIT](LICENSE). Die Lizenz gilt nur für den Code dieser Erweiterung.
