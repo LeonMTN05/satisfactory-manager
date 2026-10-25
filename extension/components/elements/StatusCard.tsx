@@ -76,10 +76,10 @@ export default ({ uuid, status, onChange }: Props) => {
       {status.reachable && !state && <p className={'text-neutral-300'}>{t('status.hidden')}</p>}
       {status.reachable && state && (
         <>
-          <div className={'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3'}>
+          <div className={'grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3'}>
             <Stat label={t('status.players')} value={`${state.numConnectedPlayers} / ${state.playerLimit}`} />
             <Stat label={t('status.tier')} value={state.isGameRunning ? state.techTier : '–'} />
-            <Stat label={t('status.phase')} value={state.isGameRunning ? formatPhase(state.gamePhase) : '–'} />
+            <Stat label={t('status.phase')} hint={t('status.phaseHint')} value={state.isGameRunning ? formatPhase(state.gamePhase) : '–'} />
             <Stat
               label={t('status.tickrate')}
               value={state.averageTickRate.toFixed(1)}

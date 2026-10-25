@@ -23,9 +23,19 @@ export const Dot = ({ ok }: { ok: boolean }) => (
   <span className={classNames('inline-block w-2.5 h-2.5 rounded-full mr-2', ok ? 'bg-green-500' : 'bg-red-500')} />
 );
 
-export const Stat = ({ label, value, className }: { label: string; value: React.ReactNode; className?: string }) => (
-  <div className={'bg-neutral-800 rounded p-3'}>
-    <p className={'text-xs uppercase text-neutral-400'}>{label}</p>
+export const Stat = ({
+  label,
+  value,
+  hint,
+  className,
+}: {
+  label: string;
+  value: React.ReactNode;
+  hint?: string;
+  className?: string;
+}) => (
+  <div className={'bg-neutral-800 rounded p-3 min-w-0'} title={hint || label}>
+    <p className={'text-xs uppercase text-neutral-400 truncate'}>{label}</p>
     <p className={classNames('text-lg font-semibold mt-1 truncate', className)}>{value}</p>
   </div>
 );
